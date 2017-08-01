@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weather Dashboard</title>
+        <!--Dependentcies-->
+        <link rel="stylesheet" type="text/css" href="../dependentcies/dc.min.css"/>
+        <!--<script type="text/javascript"  src="dependentcies/d3.min.js"></script> -->
+        <script type="text/javascript"  src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script> 
+        <script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
+
+        <script type="text/javascript"  src="dependentcies/crossfilter.min.js"></script>
+        <script type="text/javascript"  src="dependentcies/dc.js"></script>
+        <!--Dependentcies-->
+    </head>
+    <body>
+
+        <!--month-panel-->
+        <div id="month-panel">
+            <!--temp-box-->
+            <div id="suface-box" class="tile">
+                <span class="tile-title">Surface Temperature</span>
+                <div id="temp-chart"></div>
+            </div>
+            <!--/temp-box-->
+
+            <!--solar-box-->
+            <div id="solar-box" class="tile">
+                <span class="tile-title">Solar</span>
+                <div id="solar-chart"></div>
+            </div>
+            <!--/solar-box-->
+
+            <!--month-comparator-->
+            <div id="month-comparator-box" class="tile">
+                <span class="tile-title">Compare</span>
+                <div id="month-compare-chart"></div>
+            </div>
+            <!--/month-comparator-->
+
+        </div>
+        <!--/month-panel-->
+  
+  </body>
+  <script type="text/javascript"  src="js/firstGo.js"></script>
+</html>
