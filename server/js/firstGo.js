@@ -3,10 +3,10 @@
 
 var tempChart = dc.lineChart('#temp-chart');
 var solarChart = dc.lineChart('#solar-chart');
+var humidityChart = dc.lineChart('#humidity-chart');
+var rainChart = dc.lineChart('#rain-chart');
 
 var monthCompareChart = dc.compositeChart('#month-compare-chart');
-
-
 
 // Load Data
 d3.csv('data/JCMB_2015_hour.csv', function(data){
@@ -147,12 +147,13 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
     //---Charts---
 
     //Charts -- temp
-    tempChart.renderArea(false)
-        .width(600)
-        .height(400)
+    tempChart
+        .width(300)
+        .height(300)
         .margins({top: 30, right: 50, bottom: 20, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
+
         .x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 10, 2)]))
         .round(d3.time.day.round)
         .xUnits(d3.time.day)
@@ -165,9 +166,9 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
          .yAxisLabel("Celcius")
 
     //Charts -- Solar
-    solarChart.renderArea(false)
-        .width(600)
-        .height(400)
+    solarChart
+        .width(300)
+        .height(300)
         .margins({top: 30, right: 50, bottom: 20, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
@@ -185,10 +186,52 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
          .yAxisLabel("Kw/m2")
          .ordinalColors(["orange"])
 
+    //Charts -- Humidity
+    humidityChart
+        .width(300)
+        .height(300)
+        .margins({top: 30, right: 50, bottom: 20, left: 40})
+        .dimension(dayDimension)
+        .transitionDuration(1000)
+
+        .x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 10, 2)]))
+        .round(d3.time.day.round)
+        .xUnits(d3.time.day)
+        .elasticY(true)
+        .renderHorizontalGridLines(true)
+
+         .group(avgHumidity, 'Humidity')
+         .valueAccessor(function (d) {
+            return d.value.avg;
+         })
+         .yAxisLabel("%")
+         .ordinalColors(["green"])
+
+    //Charts -- rain
+    rainChart
+        .width(300)
+        .height(300)
+        .margins({top: 30, right: 50, bottom: 20, left: 40})
+        .dimension(dayDimension)
+        .transitionDuration(1000)
+
+        .x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 10, 2)]))
+        .round(d3.time.day.round)
+        .xUnits(d3.time.day)
+        .elasticY(true)
+        .renderHorizontalGridLines(true)
+
+         .group(avgRain, 'Rain')
+         .valueAccessor(function (d) {
+            return d.value.avg;
+         })
+         .yAxisLabel("%")
+         .ordinalColors(["red"])
+
     //Chars - serface temperature and voltage
     monthCompareChart
         .width(800)
-        .height(400)
+        .height(300)
         .margins({top: 30, right: 50, bottom: 20, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
@@ -200,75 +243,180 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         .renderHorizontalGridLines(true)
 
         .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-        .compose([
-            dc.lineChart(monthCompareChart)
-                    .group(avgTemp, "Monthly Index Average")
-                    .valueAccessor(function (d) {
-                        return d.value.avg;
-                    }),
-            dc.lineChart(monthCompareChart)
-                    .group(avgSolar, "Monthly Index Move")
-                    .valueAccessor(function (d) {
-                        return d.value.avg;
-                    })
-                    .title(function (d) {
-                        var value = d.value.avg ? d.value.avg : d.value;
-                        if (isNaN(value)) value = 0;
-                        return dateFormat(d.key) + "\n" + numberFormat(value);
-                    })
-                    .ordinalColors(["orange"])
-                    .useRightYAxis(true)
-                    .y(d3.scale.linear().range([0.4, 0]))
-        ])
 
     dc.renderAll();
 
     var solarCompare = dc.lineChart(monthCompareChart)
-                    .group(avgTemp, "Monthly Index Average")
-                    .valueAccessor(function (d) {
-                        return d.value.avg;
-                    });
-    var tempCompare = dc.lineChart(monthCompareChart)
-                    .group(avgTemp, "Monthly Index Average")
-                    .valueAccessor(function (d) {
-                        return d.value.avg;
-                    });
-
-    var compareShowing = {'solar':false,
-                          'temp': false};
-
-    var compareCharts = [];
-
-    //Month Clicks
-    $("#suface-box").click(function(){
-        console.log('clicked');
-        monthCompareChart.compose([
-                dc.lineChart(monthCompareChart)
-                        .group(avgTemp, "Monthly Index Average")
-                        .valueAccessor(function (d) {
-                            return d.value.avg;
-                        })
-        ])
-        dc.renderAll('monthCompareChart');
-    });
-
-    $("#solar-box").click(function(){
-        console.log('clicked');
-        monthCompareChart.compose([
-            dc.lineChart(monthCompareChart)
-                    .group(avgSolar, "Monthly Index Move")
+                    .group(avgSolar, "Solar")
                     .valueAccessor(function (d) {
                         return d.value.avg;
                     })
                     .ordinalColors(["orange"])
-                    .useRightYAxis(false)
-        ]);
-        dc.renderAll('monthCompareChart');
+                    .useRightYAxis(true);
+
+    var tempCompare = dc.lineChart(monthCompareChart)
+                    .group(avgTemp, "Temp")
+                    .valueAccessor(function (d) {
+                        return d.value.avg;
+                    });
+
+    var humidCompare = dc.lineChart(monthCompareChart)
+                    .group(avgHumidity, "Humid")
+                    .valueAccessor(function (d) {
+                        return d.value.avg;
+                    })
+                    .ordinalColors(['green']);
+
+     var rainCompare = dc.lineChart(monthCompareChart)
+                    .group(avgRain, "Rain")
+                    .valueAccessor(function (d) {
+                        return d.value.avg;
+                    })
+                    .ordinalColors(['red'])
+                    .useRightYAxis(true);
+        
+    var compareShowing = {'solar':false,
+                          'temp': false,
+                          'humid':false,
+                          'rain': false};
+
+    var compareCharts = new Set();
+  
+    //Month Clicks
+    $('#august-button').click(function(){
+        console.log('here');
+        // focus some other chart to the range selected by user on this chart
+        tempChart.x(d3.time.scale().domain([new Date(2015, 08, 1), new Date(2015, 09, 1)]));
+        tempChart.rescale();
+        tempChart.redraw();
     });
+
+    //Chark Clicks
+    $("#temp-box").click(function(){        
+        if (compareShowing.temp){
+            //remove from set
+            compareCharts.delete(tempCompare);
+            compareShowing.temp = false;
+        }
+        else{
+            //add to set
+            compareCharts.add(tempCompare);
+            compareShowing.temp = true;
+        }
+        console.log(compareCharts);
+        monthCompareChart.compose(Array.from(compareCharts))
+        dc.renderAll();
+    });
+
+    $("#solar-box").click(function(){
+        console.log('solar');        
+        if (compareShowing.solar){
+            //remove from set
+            compareCharts.delete(solarCompare);
+            compareShowing.solar = false;
+        }
+        else{
+            //add to set
+            compareCharts.add(solarCompare);
+            compareShowing.solar = true;
+        }
+        console.log(compareCharts);
+        monthCompareChart.compose(Array.from(compareCharts))
+        dc.renderAll();
+    });
+
+    $("#humidity-box").click(function(){
+        console.log('humid');        
+        if (compareShowing.humid){
+            //remove from set
+            compareCharts.delete(humidCompare);
+            compareShowing.humid = false;
+        }
+        else{
+            //add to set
+            compareCharts.add(humidCompare);
+            compareShowing.humid = true;
+        }
+        console.log(compareCharts);
+        monthCompareChart.compose(Array.from(compareCharts))
+        dc.renderAll();
+    });
+
+    $("#rain-box").click(function(){
+        console.log('rain');        
+        if (compareShowing.rain){
+            //remove from set
+            compareCharts.delete(rainCompare);
+            compareShowing.rain = false;
+        }
+        else{
+            //add to set
+            compareCharts.add(rainCompare);
+            compareShowing.rain = true;
+        }
+        console.log(compareCharts);
+        monthCompareChart.compose(Array.from(compareCharts))
+        dc.renderAll();
+    });
+    
+    
 
 
 });//d3.csv
 
+
+   //Month Clicks
+    $('#reset-button').click(function(){
+        monthScale(new Date(2015, 01, 1), new Date(2015, 10, 1));
+    });
+    $('#january-button').click(function(){
+        monthScale(new Date(2015, 01, 1), new Date(2015, 02, 1));
+    });
+    $('#febuary-button').click(function(){
+        monthScale(new Date(2015, 02, 1), new Date(2015, 03, 1));
+    });
+    $('#march-button').click(function(){
+        monthScale(new Date(2015, 03, 1), new Date(2015, 04, 1));
+    });
+    $('#april-button').click(function(){
+        monthScale(new Date(2015, 04, 1), new Date(2015, 05, 1));
+    });
+    $('#may-button').click(function(){
+        monthScale(new Date(2015, 05, 1), new Date(2015, 06, 1));
+    });
+    $('#june-button').click(function(){
+        monthScale(new Date(2015, 06, 1), new Date(2015, 07, 1));
+    });
+    $('#july-button').click(function(){
+        monthScale(new Date(2015, 07, 1), new Date(2015, 08, 1));
+    });
+    $('#august-button').click(function(){
+        monthScale(new Date(2015, 08, 1), new Date(2015, 09, 1));
+    });
+    $('#september-button').click(function(){
+        monthScale(new Date(2015, 09, 1), new Date(2015, 10, 1));
+    });
+    
+
+    function monthScale(from, to){
+        tempChart.x(d3.time.scale().domain([from, to]));
+        solarChart.x(d3.time.scale().domain([from, to]));
+        humidityChart.x(d3.time.scale().domain([from, to]));
+        rainChart.x(d3.time.scale().domain([from, to]));
+        monthCompareChart.x(d3.time.scale().domain([from, to]));
+        tempChart.rescale();
+        tempChart.redraw();
+        solarChart.rescale();
+        solarChart.redraw();
+        humidityChart.rescale();
+        humidityChart.redraw();
+        rainChart.rescale();
+        rainChart.redraw();
+        monthCompareChart.rescale();
+        monthCompareChart.redraw();
+    }
+
+    
 
 
 
