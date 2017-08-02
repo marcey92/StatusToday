@@ -1,0 +1,103 @@
+body{
+    background-color: #030876;
+    color: white;
+    font-family: 'Helvetica Neue Light', 'Helvetica Neue', 'Roboto', 'Source Sans Pro', 'Open Sans', 'Myriad Pro', 'Segoe UI', Myriad, Helvetica, 'Lucida Grande', 'DejaVu Sans Condensed', 'Liberation Sans', 'Nimbus Sans L', Tahoma, Geneva, Arial, sans-serif;
+    padding-bottom:30px;
+}
+
+text{
+    color: white;
+    fill: white;
+}
+.dc-chart g.row text {
+  color: white;
+  fill: white;  
+}
+
+#header{
+    padding:20px;
+}
+
+.tile{
+    margin-left: 30px;
+    margin-right: 30px;
+}
+.tile-title{
+    text-align:center;
+}
+
+.day-tile{
+    margin: 20px 50px;
+}
+
+table{
+    text-align:center;
+    display: table-cell;
+    vertical-align: middle;
+    padding-top:30px;
+}
+
+
+/*[data-theme=swiss] ::-moz-selection {
+  color: black;
+  text-shadow: none;
+  background-color: yellow !important;
+}*/
+/*[data-theme=swiss] ::-webkit-selection {
+  color: #black;
+  text-shadow: none;
+  background-color: yellow !important;
+}
+[data-theme=swiss] ::selection {
+  color: black;
+  text-shadow: none;
+  background-color: yellow !important;
+}*/
+
+/* Flat Notifications */
+[data-theme=swiss] [data-wrapper] aside {
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+[data-theme=swiss] [data-wrapper] aside:before {
+  display: none;
+}
+
+
+/* Flat Buttons */
+[data-theme=swiss] [data-button] {
+  border-radius: 2px;
+  text-shadow: none;
+  border: none;
+  box-shadow: none;
+  font-family: 'Helvetica Neue Light', 'Helvetica Neue', 'Roboto', 'Source Sans Pro', 'Open Sans', 'Myriad Pro', 'Segoe UI', Myriad, Helvetica, 'Lucida Grande', 'DejaVu Sans Condensed', 'Liberation Sans', 'Nimbus Sans L', Tahoma, Geneva, Arial, sans-serif;
+  color: white;
+  font-size: 24px;
+  padding: 10px;
+  margin: 5px;
+}
+
+
+/* Blue Theme */
+[data-theme=swiss] [data-button] {
+  background: #171ea5 !important;
+}
+[data-theme=swiss] [data-button]:hover,
+[data-theme=swiss] [data-button]:focus {
+  background: #07f !important;
+}
+[data-theme=swiss] [data-button]:active {
+  background: orange !important;
+}
+
+#avg-temp-box {
+        background: orange;
+        width: 200px;
+        font-size: 64px;
+        text-align: center;
+        padding-top: 50px;
+        padding-bottom: 50px;
+        height: 170px;
+        line-height: normal;
+}

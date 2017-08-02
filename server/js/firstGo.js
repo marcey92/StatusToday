@@ -1,12 +1,19 @@
 
 // Charts
 
-var tempChart = dc.lineChart('#temp-chart');
-var solarChart = dc.lineChart('#solar-chart');
-var humidityChart = dc.lineChart('#humidity-chart');
-var rainChart = dc.lineChart('#rain-chart');
+var tempChart = dc.lineChart('#temp-chart', 'month');
+var solarChart = dc.lineChart('#solar-chart', 'month');
+var humidityChart = dc.lineChart('#humidity-chart', 'month');
+var rainChart = dc.lineChart('#rain-chart', 'month');
 
-var monthCompareChart = dc.compositeChart('#month-compare-chart');
+var monthCompareChart = dc.compositeChart('#month-compare-chart', 'month');
+
+var totalRainChart = dc.rowChart('#day-rain-chart', 'day');
+var chanceRain = dc.pieChart('#chance-of-rain', 'day')
+var totalPieRainChart = dc.pieChart('#month-rain', 'day');
+
+var tempND    = dc.numberDisplay("#avg-temp-box", 'day');
+
 
 // Load Data
 d3.csv('data/JCMB_2015_hour.csv', function(data){
@@ -47,7 +54,64 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
        return d.day; 
     });
 
-    // rainfall (mm)	
+    var monthDimension = ndx.dimension(function (d){
+       return d.month.getMonth();
+    });
+
+    var rainTotalGroup = monthDimension.group().reduceSum(function (d) {
+        return d.rain;
+    });
+
+    // day of week
+    var dayOfWeek = ndx.dimension(function (d) {
+        var day = d.dd.getDay();
+        var name = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return day + '.' + name[day];
+    });
+    var dayOfWeekRainGroup = dayOfWeek.group().reduce(
+        function (p, v) {
+            ++p.days;
+            p.total += v.rain;
+            return p;
+        },
+        function (p, v) {
+            --p.days;
+            p.total -= v.rain;
+            return p;
+        },
+        function () {
+            return {days: 0, total: 0, avg: 0};
+        }
+    );
+
+    // rain or not
+    var rainOrNot = ndx.dimension(function (d) {
+        return d.rain > 0 ? 'Rain' : 'No Rain';
+    });
+    var rainOrNotGroup = rainOrNot.group();
+
+    // mean temp for number
+    var meanTemp = ndx.groupAll().reduce(
+          function (p, v) {
+              ++p.n;
+              p.total += v.temp;
+              return p;
+          },
+          function (p, v) {
+              --p.n;
+              p.total -= v.temp;
+              return p;
+          },
+          function () { return {n:0,total:0}; }
+    );
+
+    var average = function (d){
+        return d.n ? d.total / d.n : 0;
+    };
+
+
+    
+    // avg rainfall (mm)	
     var avgRain = dayDimension.group().reduce(
         function (p, v) {
             ++p.days;
@@ -105,6 +169,7 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         }
     );
 
+
     // relative humidity (%)
     var avgHumidity = dayDimension.group().reduce(
         function (p, v) {
@@ -149,8 +214,8 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
     //Charts -- temp
     tempChart
         .width(300)
-        .height(300)
-        .margins({top: 30, right: 50, bottom: 20, left: 40})
+        .height(200)
+        .margins({top: 30, right: 50, bottom: 5, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
 
@@ -158,18 +223,22 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         .round(d3.time.day.round)
         .xUnits(d3.time.day)
         .elasticY(true)
+        .mouseZoomable(false)
+        .brushOn(true)
         .renderHorizontalGridLines(true)
         .group(avgTemp, 'Temp')
         .valueAccessor(function (d) {
             return d.value.avg;
          })
          .yAxisLabel("Celcius")
+        .xAxis().tickValues([]);
+
 
     //Charts -- Solar
     solarChart
         .width(300)
-        .height(300)
-        .margins({top: 30, right: 50, bottom: 20, left: 40})
+        .height(200)
+        .margins({top: 30, right: 50, bottom: 5, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
 
@@ -179,18 +248,19 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         .elasticY(true)
         .renderHorizontalGridLines(true)
 
-         .group(avgSolar, 'Solar')
-         .valueAccessor(function (d) {
-            return d.value.avg;
-         })
-         .yAxisLabel("Kw/m2")
-         .ordinalColors(["orange"])
+        .group(avgSolar, 'Solar')
+        .valueAccessor(function (d) {
+           return d.value.avg;
+        })
+        .yAxisLabel("Kw/m2")
+        .ordinalColors(["orange"])
+        .xAxis().tickValues([]);
 
     //Charts -- Humidity
     humidityChart
         .width(300)
-        .height(300)
-        .margins({top: 30, right: 50, bottom: 20, left: 40})
+        .height(200)
+        .margins({top: 30, right: 50, bottom: 5, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
 
@@ -200,38 +270,39 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         .elasticY(true)
         .renderHorizontalGridLines(true)
 
-         .group(avgHumidity, 'Humidity')
-         .valueAccessor(function (d) {
-            return d.value.avg;
-         })
-         .yAxisLabel("%")
-         .ordinalColors(["green"])
+        .group(avgHumidity, 'Humidity')
+        .valueAccessor(function (d) {
+        return d.value.avg;
+        })
+        .yAxisLabel("%")
+        .ordinalColors(["green"])
+        .xAxis().tickValues([]);
 
     //Charts -- rain
     rainChart
         .width(300)
-        .height(300)
-        .margins({top: 30, right: 50, bottom: 20, left: 40})
+        .height(200)
+        .margins({top: 30, right: 50, bottom: 5, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
-
         .x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 10, 2)]))
         .round(d3.time.day.round)
         .xUnits(d3.time.day)
         .elasticY(true)
         .renderHorizontalGridLines(true)
-
-         .group(avgRain, 'Rain')
-         .valueAccessor(function (d) {
+        .group(avgRain, 'Rain')
+        .valueAccessor(function (d) {
             return d.value.avg;
          })
-         .yAxisLabel("%")
+         .yAxisLabel("mm")
          .ordinalColors(["red"])
+         .xAxis().tickValues([]);
+
 
     //Chars - serface temperature and voltage
     monthCompareChart
-        .width(800)
-        .height(300)
+        .width(650)
+        .height(250)
         .margins({top: 30, right: 50, bottom: 20, left: 40})
         .dimension(dayDimension)
         .transitionDuration(1000)
@@ -241,10 +312,52 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         .xUnits(d3.time.day)
         .elasticY(true)
         .renderHorizontalGridLines(true)
-
         .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
 
-    dc.renderAll();
+    //Charts - total rain
+    totalRainChart 
+        .width(400)
+        .height(180)
+        .margins({top: 20, left: 10, right: 10, bottom: 20})
+        .dimension(dayOfWeek)
+        .group(dayOfWeekRainGroup, 'Rain')
+        .valueAccessor(function (d){
+            return d.value.total;   
+        })
+        .ordinalColors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
+        .label(function (d) {
+            return d.key.split('.')[1];
+        })
+        .title(function (d) {
+            return d.value;
+        })
+        .xAxis().ticks(10);
+
+    totalPieRainChart
+        .width(100)
+        .height(100)
+        .radius(250)
+        .dimension(monthDimension)
+        .group(rainTotalGroup);
+
+    chanceRain
+        .width(200)
+        .height(200)
+        .radius(100)
+        .dimension(rainOrNot)
+        .group(rainOrNotGroup);
+
+    tempND
+        .formatNumber(d3.format(".3s"))
+        .valueAccessor(average)
+        .group(meanTemp);
+
+        
+        
+
+    dc.renderAll('month');
+    dc.renderAll('day');
+
 
     var solarCompare = dc.lineChart(monthCompareChart)
                     .group(avgSolar, "Solar")
@@ -281,16 +394,7 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
                           'rain': false};
 
     var compareCharts = new Set();
-  
-    //Month Clicks
-    $('#august-button').click(function(){
-        console.log('here');
-        // focus some other chart to the range selected by user on this chart
-        tempChart.x(d3.time.scale().domain([new Date(2015, 08, 1), new Date(2015, 09, 1)]));
-        tempChart.rescale();
-        tempChart.redraw();
-    });
-
+    
     //Chark Clicks
     $("#temp-box").click(function(){        
         if (compareShowing.temp){
@@ -356,7 +460,7 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
         }
         console.log(compareCharts);
         monthCompareChart.compose(Array.from(compareCharts))
-        dc.renderAll();
+        dc.renderAll('month');
     });
     
     
@@ -367,95 +471,105 @@ d3.csv('data/JCMB_2015_hour.csv', function(data){
 
    //Month Clicks
     $('#reset-button').click(function(){
-        monthScale(new Date(2015, 01, 1), new Date(2015, 10, 1));
+        monthScale(null);
+        monthRangeScale(new Date(2015, 01, 1), new Date(2015, 10, 1));
     });
     $('#january-button').click(function(){
-        monthScale(new Date(2015, 01, 1), new Date(2015, 02, 1));
+        monthScale(0);
+        monthRangeScale(new Date(2015, 00, 1), new Date(2015, 01, 1));
     });
     $('#febuary-button').click(function(){
-        monthScale(new Date(2015, 02, 1), new Date(2015, 03, 1));
+        monthScale(1);
+        monthRangeScale(new Date(2015, 01, 1), new Date(2015, 02, 1));
     });
     $('#march-button').click(function(){
-        monthScale(new Date(2015, 03, 1), new Date(2015, 04, 1));
+        monthScale(2);
+        monthRangeScale(new Date(2015, 02, 1), new Date(2015, 03, 1));
     });
     $('#april-button').click(function(){
-        monthScale(new Date(2015, 04, 1), new Date(2015, 05, 1));
+        monthScale(3);
+        monthRangeScale(new Date(2015, 03, 1), new Date(2015, 04, 1));
     });
     $('#may-button').click(function(){
-        monthScale(new Date(2015, 05, 1), new Date(2015, 06, 1));
+        monthScale(4);
+        monthRangeScale(new Date(2015, 04, 1), new Date(2015, 05, 1));
     });
     $('#june-button').click(function(){
-        monthScale(new Date(2015, 06, 1), new Date(2015, 07, 1));
+        monthScale(5);
+        monthRangeScale(new Date(2015, 05, 1), new Date(2015, 06, 1));
     });
     $('#july-button').click(function(){
-        monthScale(new Date(2015, 07, 1), new Date(2015, 08, 1));
+        monthScale(6);
+        monthRangeScale(new Date(2015, 06, 1), new Date(2015, 07, 1));
     });
     $('#august-button').click(function(){
-        monthScale(new Date(2015, 08, 1), new Date(2015, 09, 1));
+        monthScale(7);
+        monthRangeScale(new Date(2015, 07, 1), new Date(2015, 08, 1));
     });
     $('#september-button').click(function(){
-        monthScale(new Date(2015, 09, 1), new Date(2015, 10, 1));
+        monthScale(8);
+        monthRangeScale(new Date(2015, 08, 1), new Date(2015, 09, 1));
     });
     
 
-    function monthScale(from, to){
-        tempChart.x(d3.time.scale().domain([from, to]));
-        solarChart.x(d3.time.scale().domain([from, to]));
-        humidityChart.x(d3.time.scale().domain([from, to]));
-        rainChart.x(d3.time.scale().domain([from, to]));
-        monthCompareChart.x(d3.time.scale().domain([from, to]));
-        tempChart.rescale();
-        tempChart.redraw();
-        solarChart.rescale();
-        solarChart.redraw();
-        humidityChart.rescale();
-        humidityChart.redraw();
-        rainChart.rescale();
-        rainChart.redraw();
-        monthCompareChart.rescale();
-        monthCompareChart.redraw();
+    function monthRangeScale(from, to){
+        for (i = 0; i < 2; i++) { 
+            tempChart.x(d3.time.scale().domain([from, to]));
+            solarChart.x(d3.time.scale().domain([from, to]));
+            humidityChart.x(d3.time.scale().domain([from, to]));
+            rainChart.x(d3.time.scale().domain([from, to]));
+            monthCompareChart.x(d3.time.scale().domain([from, to]));
+            dc.redrawAll('month');
+            dc.redrawAll('month');
+        }
     }
 
-    
+    function monthScale(month){
+        totalPieRainChart.filter(null);
+        totalPieRainChart.filter(month);
+        dc.redrawAll('day')
+    }
+
+    //Day Clicks
+    $('#day-reset-button').click(function(){
+        totalRainChart.filter(null);
+        dc.redrawAll('day');
+    });
+    $('#sunday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('0.Sun');
+        dc.redrawAll('day');
+    });
+    $('#monday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('1.Mon');
+        dc.redrawAll('day');
+    });
+    $('#tuesday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('2.Tue');
+        dc.redrawAll('day');
+    });
+    $('#wednesday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('3.Wed');
+        dc.redrawAll('day');
+    });
+    $('#thursday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('4.Thu');
+        dc.redrawAll('day');
+    });
+    $('#friday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('5.Fri');
+        dc.redrawAll('day');
+    });
+    $('#saturday-button').click(function(){
+        totalRainChart.filter(null);
+        totalRainChart.filter('6.Sat');
+        dc.redrawAll('day');
+    });
 
 
 
-
-
-
-
-
-    // // var indexAvgMonthGroup = monthlyDimension.group().reduce(
-    // //     function (p, v){
-    // //         ++p.day;
-    // //         p.total
-    // //     }
-    // // )
-
-    // // May come back too -  will need min power to max
-    // // var monthlyPerformanceGroup = monthlyDimension.group().reduce(
-    // //  
-    // // );
-
-    // // Create chart
-
-    // // solarPowerChart /* dc.barChart(#solar-power) */
-    // //     .width(420)
-    // //     .height(180)
-    // //     .margins({top:10, right:50, bottom: 30, left:40})
-    // //     .dimensions(monthlyDimension)
-    // //     .group(monthlyDimension.group())
-    // //     .elasticY(true);
-
-    // // Bar chart that matches area chart - or something
-    // solarPowerChart.width(990)
-    //     .height(100)
-    //     .margins({top: 0, right: 50, bottom: 20, left: 40})
-    //     .dimension(monthlyDimension)
-    //     .group(avgPowerMonth)
-    //     .centerBar(true)
-    //     .gap(1)
-    //     .x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 10, 2)]))
-    //     .round(d3.time.month.round)
-    //     .alwaysUseRounding(true)
-    //     .xUnits(d3.time.months);
