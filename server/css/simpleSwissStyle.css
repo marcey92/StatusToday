@@ -87,3 +87,6 @@ table{
 #max-temp-box {
         background: orangered;
 }
+#footer {
+    text-align: right;
+}
