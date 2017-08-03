@@ -1,46 +1,166 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Weather Dashboard</title>
-    <!--Dependentcies-->
-    <link rel="stylesheet" type="text/css" href="../dependentcies/dc.min.css"/>
-    <!--<script type="text/javascript"  src="dependentcies/d3.min.js"></script> -->
-    <script type="text/javascript"  src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script> 
-    
-    <script type="text/javascript"  src="dependentcies/crossfilter.min.js"></script>
-    <script type="text/javascript"  src="dependentcies/dc.js"></script>
-    <!--Dependentcies-->
-  </head>
-  <body>
+    <head>
+        <title>Weather Dashboard</title>
+        <!--jquery-->
+        <script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
+        <!--bootstrap-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!--d3-->
+        <script type="text/javascript"  src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script> 
+        <!--crossfilter-->
+        <script type="text/javascript"  src="dependentcies/crossfilter.min.js"></script>
+        <!--dc-->
+        <link rel="stylesheet" type="text/css" href="../dependentcies/dc.min.css"/>
+        <script type="text/javascript"  src="dependentcies/dc.js"></script>
+        <!--reductio-->
+        <script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/reductio/0.6.3/reductio.js"></script>
+        <!--style-->
+        <link rel="stylesheet" type="text/css" href="css/simpleSwissStyle.css"/>
+    </head>
+    <body>
+        <!--main-panel-->
+        <div class="container-fluid">
+            <!--Header-->
+                <div id="header">
+                    <h3>StatusToday</h3>
+                    <p>
+                        Use Case:<br>
+                        Your company ground is able to lease it's land January to September for speciel events. Unfortunalty due to it's location, a remote valley with a unique climate, national weather data is unabel to predict the local climate.
+                        This makes pricing the ground difficult.<br>
+                        A weather machine has been set up and has monitored the weather over the last year. The manager wants to stager the price of the lease by month and by the day of the week: better weather meaning a higher price.<br>
+                        This dashbourd allows you to view the most relevent data to make your decisions on when the price could be high or low to maximse customers and profit.
+                    </p>
+                </div>
+            <!--/Header-->
 
-  <h3>Atmospheric Pressure</h3>
-  <div id="atmos-chart"></div>
+            <!--main-row-->
+            <div class="row">                                
+                <!--month-panel-->
+                <div id="month-panel" class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <h4>Months Open for Buisness</h4>
+                    <div id="month-selectors">
+                        <button data-button id="january-button" type="button" class="month-button data-button">January</button>
+                        <button data-button id="febuary-button" type="button" class="month-button data-button">Febuary</button>
+                        <button data-button id="march-button" type="button" class="month-button data-button">March</button>
+                        <button data-button id="april-button" type="button" class="month-button data-button">April</button>
+                        <button data-button id="may-button" type="button" class="month-button data-button">May</button>
+                        <button data-button id="june-button" type="button" class="month-button data-button">June</button>
+                        <button data-button id="july-button" type="button" class="month-button data-button">July</button>
+                        <button data-button id="august-button" type="button" class="month-button data-button">August</button>
+                        <button data-button id="september-button" type="button" class="month-button data-button">September</button>
+                        <button data-button id="reset-button" type="button" class="month-button data-button">Reset Month</button>
+                    </div>
 
-  <h3>Rainfall</h3>
-  <div id="rain-chart"></div>
-
-  <h3>Wind Speed</h3>
-  <div id="wind-chart"></div>
-
-  <h3>Wind Direction</h3>
-  <div id="direction-chart"></div>
-
-  <h3>Surface Temperature</h3>
-  <div id="temp-chart"></div>
-
-  <h3>Humidity</h3>
-  <div id="humidity-chart"></div>
-
-  <h3>Solar</h3>
-  <div id="solar-chart"></div>
-
-  <h3>Battery</h3>
-  <div id="battery-chart"></div>
-
-  <div id="temp-solar-chart"><span>Temp and Solar Chart</span></div>
-
-  <div id="solar-humidity-chart"><span>Temp and Humidity Chart</span></div>
-  
-  </body>
-  <script type="text/javascript"  src="js/main.js"></script>
+                    <table id="month-table">
+                        <tr>
+                            <td>
+                                <!--temp-box-->
+                                <div id="temp-box" class="tile">
+                                    <h5 class="tile-title">Surface Temperature</h5>
+                                    <div id="temp-chart"></div>
+                                </div>
+                                <!--/temp-box-->
+                            </td>
+                            <td>
+                            <!--solar-box-->
+                            <div id="solar-box" class="tile">
+                                <h5 class="tile-title">Solar Power</h5>
+                                <div id="solar-chart"></div>
+                            </div>
+                            <!--/solar-box-->
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <!--humidity-box-->
+                                <div id="humidity-box" class="tile">
+                                    <h5 class="tile-title">Humidity</h5>
+                                    <div id="humidity-chart"></div>
+                                </div>
+                                <!--/humidty-box-->
+                            </td>
+                            <td>
+                                <!--rain-box-->
+                                <div id="rain-box" class="tile">
+                                    <h5 class="tile-title">Rain Fall</h5>
+                                    <div id="rain-chart"></div>
+                                </div>
+                                <!--/rain-box-->
+                            </td>
+                        </tr>
+                    </table>
+                    <!--month-comparator-->
+                    <div id="month-comparator-box" class="tile">
+                        <div id="month-compare-chart"></div>
+                    </div>
+                    <!--/month-comparator-->
+                </div>
+                <!--/month-panel-->
+                <!--week-panel-->
+                <div id="day-panel" class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <h4>Days of Week</h4>
+                    <div id="day-selectors">
+                        <button data-button id="monday-button" type="button" class="day-button data-button">Monday</button>
+                        <button data-button id="tuesday-button" type="button" class="day-button data-button">Tuesday</button>
+                        <button data-button id="wednesday-button" type="button" class="day-button data-button">Wednesday</button>
+                        <button data-button id="thursday-button" type="button" class="day-button data-button">Thursday</button>
+                        <button data-button id="friday-button" type="button" class="day-button data-button">Friday</button>
+                        <button data-button id="saturday-button" type="button" class="day-button data-button">Saturday</button>
+                        <button data-button id="sunday-button" type="button" class="day-button data-button">Sunday</button>
+                        <button data-button id="day-reset-button" type="button" class="day-button data-button">Reset Day</button>
+                    </div>
+                
+                    <table>
+                        <tr>
+                            <td>
+                                <!--day-rain-chart-->
+                                <div id="day-rain-box" class="day-tile">
+                                    <h5 class="tile-title">Total Rain Fall (mm)</h5>
+                                    <div id="day-rain-chart"></div>
+                                </div>
+                                <!--/day-rain-chart-->
+                            </td>
+                        </tr>
+                    </table>
+                    <br>
+                    <table>
+                        <tr>
+                            <td>
+                                <!--min-temp-box-->
+                                <h5 class="tile-title">Min Temperature C</h5>
+                                    <div id="min-temp-box" class="day-tile box">
+                                    </div>
+                                <!--/min-temp-box-->
+                            </td>
+                            <td>
+                                <!--avg-temp-box-->
+                                <h5 class="tile-title">Average Temperature C</h5>
+                                    <div id="avg-temp-box" class="day-tile box">
+                                    </div>
+                                <!--/avg-temp-box-->
+                            </td>
+                            <td>
+                                <!--max-temp-box-->
+                                <h5 class="tile-title">Max Temperature C</h5>
+                                    <div id="max-temp-box" class="day-tile box">
+                                    </div>
+                                <!--/max-temp-box-->
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!--/week-panel-->
+            </div>
+            <!--/main-row-->
+            <!--Footer-->
+            <div id="footer">
+                <p>@MarcelRiederer</p>
+            <div>
+            <!--/Footer-->
+        </div>
+        <!--/main-panel-->
+    </body>
+    <script type="text/javascript"  src="js/weatherCharts.js"></script>
 </html>
